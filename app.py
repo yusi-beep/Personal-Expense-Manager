@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 
 import csv
 import os
-from datetime import datedime
+from datetime import datetime
 from collections import defaultdict
 import matplotlib
 matplotlib.use('Agg') #to work without GUI
@@ -42,7 +42,7 @@ def records():
     records = load_records()
     return render_template("records.html", records=records)
 
-@app.route("/add", method=["GET", "POST"])
+@app.route("/add", methods=["GET", "POST"])
 def add():
     if reques.method == "POST":
         date = datetime.now().strtime("%Y-%m-%d")
@@ -57,4 +57,4 @@ def add():
 
         return redirect(url_for("index"))
 
-    retur render_template("add.html")
+    return render_template("add.html")
