@@ -32,15 +32,21 @@ def view_records():
 
 def calculate_balance():
 	balance = 0
+	income = 0
+	expense = 0
 	with open(FILE_NAME, "r", encoding="utf-8") as file:
 		reader = csv.DictReader(file)
 		for row in reader:
 			amount = float(row["amount"])
 			if row["type"] == "income":
 				balance += amount
+				income += amount
 			elif row["type"] == "expense":
 				balance -= amount
+				expense += amount
 	print(f"Current balance: {balance:.2f} BGN")
+	print(f"Total income: {income:.2f} BGN")
+	print(f"Total expense: {expense:.2f} BGN")
 
 def menu():
 	while True:
