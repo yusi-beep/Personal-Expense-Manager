@@ -24,11 +24,24 @@ def add_record():
 	print("Record added successfully!")
 
 def view_records():
-		with open(FILE_NAME, "r", encoding="utf-8") as file:
-			reader = csv.reader(file)
-			next(reader) #skip header
-			for row in reader:
-				print(row)
+	with open(FILE_NAME, "r", encoding="utf-8") as file:
+		reader = csv.reader(file)
+		next(reader) #skip header
+		for row in reader:
+			print(row)
+
+def calculate_balance():
+	balance = 0
+	with open(FILE_NAME, "r", encoding="utf-8") as file:
+		reader = csv.DictReader(file)
+		for row in reader:
+			amount = float(row["amount"])
+			if row["type"] == "income":
+				balance += amount
+			elif row["type"] == "expense":
+				balance -= amount
+	print(f"Current balance: {balance:.2f} BGN")
+
 def menu():
 	while True:
 		print("\n=== Personal Expense Tracker ===")
@@ -43,6 +56,8 @@ def menu():
 			add_record()
 		elif choice == "2":
 			view_records()
+		elif choice == "3":
+			calculate_balance()
 		elif choice == "4":
 			print("Exit from program successfully.")
 			break
