@@ -23,6 +23,12 @@ def add_record():
 
 	print("Record added successfully!")
 
+def view_records():
+		with open(FILE_NAME, "r", encoding="utf-8") as file:
+			reader = csv.reader(file)
+			next(reader) #skip header
+			for row in reader:
+				print(row)
 def menu():
 	while True:
 		print("\n=== Personal Expense Tracker ===")
@@ -35,6 +41,8 @@ def menu():
 
 		if choice == "1":
 			add_record()
+		elif choice == "2":
+			view_records()
 		elif choice == "4":
 			print("Exit from program successfully.")
 			break
