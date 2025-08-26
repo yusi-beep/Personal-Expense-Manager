@@ -1,6 +1,8 @@
 import csv
 import os
 from datetime import datetime
+import matplotlib.pyplot as plt
+from collections import defaultdict
 
 FILE_NAME = "expenses.csv"
 
@@ -79,6 +81,24 @@ def filter_by_month():
 	print(f"Expense for {year_month}: {total_expense:.2f} BGN")
 	print(f"Net: {(total_income - total_expense):.2f} BGN")
 
+def plot_expenses_by_category():
+	categories = defaultdict(float)
+	with open(FILE_NAME, "r", encoding="utf-8") as file:
+		reader = csv.DictReader(file)
+		for row in reader:
+			if row["type"] == "expense":
+				categories[row["category"]] += float(row["amount"])
+
+	if not categories:
+		print("No expenses found!")
+		return
+
+	plt.figure(figsize=(6, 6))
+	plt.pie(categories.values(), labels=categories.keys(), autopct="%1.1f%%", startangle=90)
+	plt.title("Expenses by category")
+	plt.show()
+
+
 def menu():
 	while True:
 		print("\n=== Personal Expense Tracker ===")
@@ -87,7 +107,8 @@ def menu():
 		print("3. Balance summary")
 		print("4. Filter by category")
 		print("5. Filter by month")
-		print("6. Exit")
+		print("6. Plot expenses by category (pie chart)")
+		print("7. Exit")
 
 		choice = input("Select: ")
 
@@ -102,6 +123,8 @@ def menu():
 		elif choice == "5":
 			filter_by_month()
 		elif choice == "6":
+			plot_expenses_by_category()
+		elif choice == "7":
 			print("Exit from program successfully.")
 			break
 		else:
