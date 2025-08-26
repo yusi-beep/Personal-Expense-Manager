@@ -48,13 +48,26 @@ def calculate_balance():
 	print(f"Total income: {income:.2f} BGN")
 	print(f"Total expense: {expense:.2f} BGN")
 
+def filter_by_category():
+	category = input("Enter category to filter: ").strip().lower()
+	total = 0
+	with open(FILE_NAME, "r", encoding="utf-8") as file:
+		reader = csv.DictReader(file)
+		print(f"\n == Records in category '{category}' ===")
+		for row in reader:
+			if row["category"].lower() == category:
+				print(row)
+				total += float(row["amount"])
+	print(f"Total for category '{category}': {total:.2f} BGN")
+
 def menu():
 	while True:
 		print("\n=== Personal Expense Tracker ===")
 		print("1. Add record")
 		print("2. View record")
-		print("3. Balance")
-		print("4. Exit")
+		print("3. Balance summary")
+		print("4. Filter by category")
+		print("5. Exit")
 
 		choice = input("Select: ")
 
@@ -65,6 +78,8 @@ def menu():
 		elif choice == "3":
 			calculate_balance()
 		elif choice == "4":
+			filter_by_category()
+		elif choice == "5":
 			print("Exit from program successfully.")
 			break
 		else:
