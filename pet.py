@@ -60,6 +60,25 @@ def filter_by_category():
 				total += float(row["amount"])
 	print(f"Total for category '{category}': {total:.2f} BGN")
 
+def filter_by_month():
+	year_month = input("Enter month (YYYY-MM): ").strip()
+	total_income = 0
+	total_expense = 0
+	with open(FILE_NAME, "r", encoding="utf-8") as file:
+		reader = csv.DictReader(file)
+		print(f"\n=== Records for {year_month} ===")
+		for row in reader:
+		 	if row["date"].startswith(year_month):
+		 		print(row)
+		 		amount = float(row["amount"])
+		 		if row["type"] == "income":
+		 			total_income += amount
+		 		elif row["type"] == "expense":
+		 			total_expense += amount
+	print(f"Income for {year_month}: {total_income:.2f} BGN")
+	print(f"Expense for {year_month}: {total_expense:.2f} BGN")
+	print(f"Net: {(total_income - total_expense):.2f} BGN")
+
 def menu():
 	while True:
 		print("\n=== Personal Expense Tracker ===")
@@ -67,7 +86,8 @@ def menu():
 		print("2. View record")
 		print("3. Balance summary")
 		print("4. Filter by category")
-		print("5. Exit")
+		print("5. Filter by month")
+		print("6. Exit")
 
 		choice = input("Select: ")
 
@@ -80,6 +100,8 @@ def menu():
 		elif choice == "4":
 			filter_by_category()
 		elif choice == "5":
+			filter_by_month()
+		elif choice == "6":
 			print("Exit from program successfully.")
 			break
 		else:
