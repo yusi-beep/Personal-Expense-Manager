@@ -1,1 +1,19 @@
-
+{% extends "base.html" %}
+{% block content %}
+<h3>All Record</h3>
+<table class="table table-striped">
+	<tr>
+		<th>Date</th><th>Type</th><th>Category</th><th>Amount</th></th><th>Description</th>
+	</tr>
+	{% for r in records %}
+	<tr>
+		<td>{{ r.date}}</td>
+		<td>{{ r.type}}</td>
+		<td>{{ r.category}}</td>
+		<td>{{ r.amount}}</td>
+		<td>{{ r.description}}</td>
+	</tr>
+	{% endfor %}
+	
+</table>
+{% endblock %}
