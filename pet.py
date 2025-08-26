@@ -98,6 +98,42 @@ def plot_expenses_by_category():
 	plt.title("Expenses by category")
 	plt.show()
 
+def plot_monthly_summary():
+	monthly_income = defaultdict(float)
+	monthly_expense = defaultdict(float)
+
+	with open(FILE_NAME, "r", encoding="utf-8") as file:
+		reader = csv.DictReader(file)
+		for row in reader:
+			date_obj = datetime.strptime(row["date"], "%Y-%m-%d")
+			year_month = date_obj.strftime("%Y-%m")
+
+			amount = float(row["amount"])
+			if row["type"] == "income":
+				monthly_income[year_month] += amount
+			elif row["type"] == "expense":
+				monthly_expense[year_month] += amount
+
+	if not monthly_income and not monthly_expense:
+		print("No data found!")
+		return
+
+	month = sorted(set(list(monthly_income.keys()) + list(monthly_expense.keys())))
+
+	income_vals = [monthly_income[m] for m in month]
+	expense_vals = [monthly_expense[m] for m in month]
+
+	x = range(len(month))
+	plt.figure(figsize=(8, 5))
+	plt.bar(x, income_vals, width=0.4, label="Income", align="center")
+	plt.bar(x, expense_vals, width=0.4, label="Expence", align="edge")
+	plt.xticks(x,month, rotation=45)
+	plt.title("Monthly Income vs Expense")
+	plt.xlabel("Month")
+	plt.ylabel("Amount (BGN)")
+	plt.legend()
+	plt.tight_layout()
+	plt.show()
 
 def menu():
 	while True:
@@ -108,7 +144,8 @@ def menu():
 		print("4. Filter by category")
 		print("5. Filter by month")
 		print("6. Plot expenses by category (pie chart)")
-		print("7. Exit")
+		print("7. Plot monthly summary (bar chart)")
+		print("8. Exit")
 
 		choice = input("Select: ")
 
@@ -125,6 +162,8 @@ def menu():
 		elif choice == "6":
 			plot_expenses_by_category()
 		elif choice == "7":
+			plot_monthly_summary()
+		elif choice == "8":
 			print("Exit from program successfully.")
 			break
 		else:
