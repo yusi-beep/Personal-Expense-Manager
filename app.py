@@ -45,11 +45,28 @@ def calculate_balance(records):
     balance = round(income - expense,2)
     return income, expense, balance
 
+def expenses_by_category(records):
+    categories = defaultdict(float)
+    for r in records:
+        if r["type"] == "expense":
+            categories[r["category"]] += float(r["amount"])
+    return categories
+
 @app.route("/")
 def index():
     records = load_records()
     income, expense, balance = calculate_balance(records)
-    return render_template("index.html", income=income, expense=expense, balance=balance)
+
+    cat_data = expenses_by_category(records)
+
+    return render_template(
+        "index.html",
+        income=income,
+        expense=expense,
+        balance=balance,
+        cat_labels=list(cat_data.keys()),
+        cat_values=list(cat_data.values())
+        )
 
 @app.route("/records")
 def records():

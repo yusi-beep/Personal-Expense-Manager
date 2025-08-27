@@ -4,4 +4,26 @@
 <p><b>Income: </b>{{ income }} BGN</p>
 <p><b>Expense: </b>{{ expense }} BGN</p>
 <p><b>Balance: </b>{{ balance }} BGN</p>
+
+<hr>
+
+<h3>Expenses by Category</h3>
+<canvas id="categoryChart"></canvas>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+	// Pie chart - Expenses by Category
+	const ctx1 = document.getElementById('categoryChart').getContext('2d');
+	const categoryChart = new Chart(ctx1, {
+		type: 'pie',
+		data: {
+			labels: {{ cat_labels|tojson }},
+			datasets: [{
+ 				data: {{ cat_values|tojson }},
+				backgroundColor: ['#ff6384','#36a2eb','#ffce56','#4bc0c0','#9966ff','#ff9f40']
+			}]
+		},
+	});
+</script>
 {% endblock %}	
