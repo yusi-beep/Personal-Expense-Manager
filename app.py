@@ -84,11 +84,11 @@ def index():
         income=income,
         expense=expense,
         balance=balance,
-        cat_labels=list(cat_data.keys()),
-        cat_values=list(cat_data.values()),
-        months=months,
-        income_vals=income_vals,
-        expense_vals=expense_vals
+        cat_labels=list(cat_data.keys()) if cat_data else [],
+        cat_values=list(cat_data.values()) if cat_data else [],
+        months=months if months else [],
+        income_vals=income_vals if income_vals else [],
+        expense_vals=expense_vals if expense_vals else []
         )
 
 @app.route("/records")

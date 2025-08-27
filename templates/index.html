@@ -8,56 +8,30 @@
 <hr>
 
 <!-- configure style for charts with css -->
+{% if cat_labels|length > 0 %}
 <h3>Expenses by Category</h3>
 <canvas id="categoryChart"></canvas>
+{% else %}
+<p>No expense data for categories yet.</p>
+{% endif %}
 
+{% if cat_labels|length > 0 %}
 <h3 class="mt-4">Monthly Income vs Expense</h3>
 <canvas id="monthlyChart"></canvas>
+{% else %}
+<p>No monthly data yet.</p>
+{% endif %}
 
-<!-- Chart.js -->
-<!-- move scripts in .js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-	// Pie chart - Expenses by Category
-	const ctx1 = document.getElementById('categoryChart').getContext('2d');
-	const categoryChart = new Chart(ctx1, {
-		type: 'pie',
-		data: {
-			labels: {{ cat_labels|tojson }},
-			datasets: [{
- 				data: {{ cat_values|tojson }},
-				backgroundColor: ['#ff6384','#36a2eb','#ffce56','#4bc0c0','#9966ff','#ff9f40']
-			}]
-		},
-	});
+    console.log("cat_labels:", {{ cat_labels|tojson }});
+    console.log("cat_values:", {{ cat_values|tojson }});
+    console.log("months:", {{ months|tojson }});
+    console.log("income_vals:", {{ income_vals|tojson }});
+    console.log("expense_vals:", {{ expense_vals|tojson }});
 
-	// Bar chart - Monthly Income vs Expense
-    const ctx2 = document.getElementById('monthlyChart').getContext('2d');
-    const monthlyChart = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-            labels: {{ months|tojson }},
-            datasets: [
-                {
-                    label: 'Income',
-                    data: {{ income_vals|tojson }},
-                    backgroundColor: '#36a2eb'
-                },
-                {
-                    label: 'Expense',
-                    data: {{ expense_vals|tojson }},
-                    backgroundColor: '#ff6384'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+    window.onload = function() {
+    	renderCategoryChart({{ cat_labels|tojson }}, {{ cat_values|tojson }});
+        renderMonthlyChart({{ months|tojson }}, {{ income_vals|tojson }}, {{ expense_vals|tojson }});
+    }
 </script>
 {% endblock %}	
