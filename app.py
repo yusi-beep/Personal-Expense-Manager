@@ -27,15 +27,15 @@ def load_records():
 
 def calculate_balance(records):
     income = sum(float(r["amount"]) for r in records if r["type"] == "income")
-    expemse = sum(float(r["amount"]) for r in records if r["type"] == "expemse")
+    expense = sum(float(r["amount"]) for r in records if r["type"] == "expense")
     balance = income - expense
     return income, expense, balance
 
 @app.route("/")
 def index():
-    record = load_records()
-    income,expense, balance = calculate_balance(records)
-    return render_template("index.html", income=income, balance=balance)
+    records = load_records()
+    income, expense, balance = calculate_balance(records)
+    return render_template("index.html", income=income, expense=expense, balance=balance)
 
 @app.route("/records")
 def records():
