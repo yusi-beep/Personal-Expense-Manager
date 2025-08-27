@@ -10,12 +10,18 @@ import matplotlib.pyplot as pyplot
 app = Flask(__name__)
 
 FILE_NAME = "expenses.csv"
+CATEGORY_FILE = "categories.csv"
 
 #Check if exist CSV
 if not os.path.exists(FILE_NAME):
     with open(FILE_NAME, "w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writrow(["date", "type", "category", "amount", "description"])
+
+if not os.path.exists(CATEGORY_FILE):
+    with open(CATEGORY_FILE, "w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(["category"])
 
 def load_records():
     records = []
@@ -24,6 +30,14 @@ def load_records():
         for row in reader:
             records.append(row)
     return records
+
+def load_categories():
+    categories = []
+    with open(CATEGORY_FILE, "r", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            categories.append(row["category"])
+    return categories
 
 def calculate_balance(records):
     income = round(sum(float(r["amount"]) for r in records if r["type"] == "income"),2)
@@ -42,6 +56,19 @@ def records():
     records = load_records()
     return render_template("records.html", records=records)
 
+@app.route("/add_category", methods=["GET", "POST"])
+def add_category():
+    if request.method == "POST":
+        category = request.form["category"].strip()
+        if category:  # add only if not empty
+            with open(CATEGORY_FILE, "a", newline="", encoding="utf-8") as file:
+                writer = csv.writer(file)
+                writer.writerow([category])
+        return redirect(url_for("add_category"))
+
+    categories = load_categories()
+    return render_template("add_category.html", categories=categories)
+
 @app.route("/add", methods=["GET", "POST"])
 def add():
     if request.method == "POST":
@@ -57,7 +84,8 @@ def add():
 
         return redirect(url_for("index"))
 
-    return render_template("add.html")
+    categories = load_categories()
+    return render_template("add.html", categories=categories)
 
 if __name__ == "__main__":
     app.run(debug=True)
