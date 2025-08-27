@@ -26,9 +26,9 @@ def load_records():
     return records
 
 def calculate_balance(records):
-    income = sum(float(r["amount"]) for r in records if r["type"] == "income")
-    expense = sum(float(r["amount"]) for r in records if r["type"] == "expense")
-    balance = income - expense
+    income = round(sum(float(r["amount"]) for r in records if r["type"] == "income"),2)
+    expense = round(sum(float(r["amount"]) for r in records if r["type"] == "expense"),2)
+    balance = round(income - expense,2)
     return income, expense, balance
 
 @app.route("/")
