@@ -44,7 +44,7 @@ def records():
 
 @app.route("/add", methods=["GET", "POST"])
 def add():
-    if reques.method == "POST":
+    if request.method == "POST":
         date = datetime.now().strtime("%Y-%m-%d")
         entry_type = request.form["type"]
         category = request.form["category"]
