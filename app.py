@@ -52,12 +52,32 @@ def expenses_by_category(records):
             categories[r["category"]] += float(r["amount"])
     return categories
 
+def monthly_summary(records):
+    monthly_income = defaultdict(float)
+    monthly_expense = defaultdict(float)
+
+    for r in records:
+        date_obj = datetime.strptime(r["date"], "%Y-%m-%d")
+        year_month = date_obj.strftime("%Y-%m")
+        amount = float(r["amount"])
+        if r["type"] == "income":
+            monthly_income[year_month] += amount
+        elif r["type"] == "expense":
+            monthly_expense[year_month] += amount
+
+    months = sorted(set(list(monthly_income.keys()) + list(monthly_expense.keys())))
+    income_vals = [monthly_income[m] for m in months]
+    expense_vals = [monthly_expense[m] for m in months]
+
+    return months, income_vals, expense_vals
+
 @app.route("/")
 def index():
     records = load_records()
     income, expense, balance = calculate_balance(records)
 
     cat_data = expenses_by_category(records)
+    months, income_vals, expense_vals = monthly_summary(records)
 
     return render_template(
         "index.html",
@@ -65,7 +85,10 @@ def index():
         expense=expense,
         balance=balance,
         cat_labels=list(cat_data.keys()),
-        cat_values=list(cat_data.values())
+        cat_values=list(cat_data.values()),
+        months=months,
+        income_vals=income_vals,
+        expense_vals=expense_vals
         )
 
 @app.route("/records")
@@ -81,7 +104,7 @@ def add_category():
             with open(CATEGORY_FILE, "a", newline="", encoding="utf-8") as file:
                 writer = csv.writer(file)
                 writer.writerow([category])
-        return redirect(url_for("add_category"))
+            return redirect(url_for("add_category"))
 
     categories = load_categories()
     return render_template("add_category.html", categories=categories)

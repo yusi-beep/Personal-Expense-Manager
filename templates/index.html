@@ -7,10 +7,15 @@
 
 <hr>
 
+<!-- configure style for charts with css -->
 <h3>Expenses by Category</h3>
 <canvas id="categoryChart"></canvas>
 
+<h3 class="mt-4">Monthly Income vs Expense</h3>
+<canvas id="monthlyChart"></canvas>
+
 <!-- Chart.js -->
+<!-- move scripts in .js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 	// Pie chart - Expenses by Category
@@ -25,5 +30,34 @@
 			}]
 		},
 	});
+
+	// Bar chart - Monthly Income vs Expense
+    const ctx2 = document.getElementById('monthlyChart').getContext('2d');
+    const monthlyChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: {{ months|tojson }},
+            datasets: [
+                {
+                    label: 'Income',
+                    data: {{ income_vals|tojson }},
+                    backgroundColor: '#36a2eb'
+                },
+                {
+                    label: 'Expense',
+                    data: {{ expense_vals|tojson }},
+                    backgroundColor: '#ff6384'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
 </script>
 {% endblock %}	
