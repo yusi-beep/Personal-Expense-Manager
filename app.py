@@ -45,7 +45,7 @@ def records():
 @app.route("/add", methods=["GET", "POST"])
 def add():
     if request.method == "POST":
-        date = datetime.now().strtime("%Y-%m-%d")
+        date = datetime.now().strftime("%Y-%m-%d")
         entry_type = request.form["type"]
         category = request.form["category"]
         amount = request.form["amount"]
@@ -53,7 +53,7 @@ def add():
 
         with open(FILE_NAME, "a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
-            writer.writrow([date, entry_type, category, amount, description])
+            writer.writerow([date, entry_type, category, amount, description])
 
         return redirect(url_for("index"))
 

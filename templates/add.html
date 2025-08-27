@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <h3>Add Record</h3>
-<form>
+<form method="POST">
 	<label>Type</label>
 	<select name="type" class="form-control">
 		<option value="income">Income</option>
-		<option value="expence">Expense</option>
+		<option value="expense">Expense</option>
 	</select>
 	<label>Category</label>
 	<input type="text" name="category" class="form-control">
