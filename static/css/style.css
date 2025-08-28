@@ -12,12 +12,12 @@ nav a {
 }
 
 canvas {
-  max-width: 500px !important;
+  max-width: 600px !important;
   max-height: 300px !important;
 }
 
 .chart-box {
-  width: 500px;
+  width: 600px;
   height: 300px;
   max-width: 100%;
   position: relative; /* important for Chart.js with responsive */
