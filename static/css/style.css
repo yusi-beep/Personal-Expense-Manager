@@ -25,3 +25,5 @@ canvas {
 
 .card { border-radius: 12px; }
 .card-header { background: #fff; border-bottom: 1px solid #eee; }
+
+.btn-group .btn.active { color:#fff; }
