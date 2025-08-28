@@ -1,24 +1,46 @@
 from flask import Blueprint, render_template
-from models.records import load_records, calculate_balance, expenses_by_category, monthly_summary
+from flask_login import login_required, current_user
+from models.models import Record
+from collections import defaultdict
+from datetime import datetime
 
 home_bp = Blueprint("home", __name__)
 
 @home_bp.route("/")
+@login_required
 def index():
-    records = load_records()
-    income, expense, balance = calculate_balance(records)
+    records = Record.query.filter_by(user_id=current_user.id).all()
 
-    cat_data = expenses_by_category(records)
-    months, income_vals, expense_vals = monthly_summary(records)
+    income = sum(r.amount for r in records if r.type == "income")
+    expense = sum(r.amount for r in records if r.type == "expense")
+    balance = income - expense
 
-    return render_template(
-        "index.html",
-        income=income,
-        expense=expense,
-        balance=balance,
-        cat_labels=list(cat_data.keys()) if cat_data else [],
-        cat_values=list(cat_data.values()) if cat_data else [],
-        months=months if months else [],
-        income_vals=income_vals if income_vals else [],
-        expense_vals=expense_vals if expense_vals else []
+    # Разходи по категории
+    cat_data = defaultdict(float)
+    for r in records:
+        if r.type == "expense":
+            cat_data[r.category] += r.amount
+
+    # Income/expense for months
+    monthly_income = defaultdict(float)
+    monthly_expense = defaultdict(float)
+    for r in records:
+        date_obj = datetime.strptime(r.date, "%Y-%m-%d")
+        ym = date_obj.strftime("%Y-%m")
+        if r.type == "income":
+            monthly_income[ym] += r.amount
+        else:
+            monthly_expense[ym] += r.amount
+
+    months = sorted(set(monthly_income.keys()) | set(monthly_expense.keys()))
+
+    return render_template("index.html",
+        income=round(income, 2),
+        expense=round(expense, 2),
+        balance=round(balance, 2),
+        cat_labels=list(cat_data.keys()),
+        cat_values=list(cat_data.values()),
+        months=months,
+        income_vals=[monthly_income[m] for m in months],
+        expense_vals=[monthly_expense[m] for m in months]
     )

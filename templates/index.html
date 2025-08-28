@@ -7,20 +7,43 @@
 
 <hr>
 
-<!-- configure style for charts with css -->
-{% if cat_labels|length > 0 %}
-<h3>Expenses by Category</h3>
-<canvas id="categoryChart"></canvas>
-{% else %}
-<p>No expense data for categories yet.</p>
-{% endif %}
+<div class="row g-4">
+  <!-- Card 1: Pie -->
+  <div class="col-12 col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header">
+        <h5 class="mb-0">Expenses by Category</h5>
+      </div>
+      <div class="card-body d-flex justify-content-center">
+        {% if cat_labels|length > 0 %}
+          <div class="chart-box">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        {% else %}
+          <p class="text-muted m-0">No expense data for categories yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 
-{% if cat_labels|length > 0 %}
-<h3 class="mt-4">Monthly Income vs Expense</h3>
-<canvas id="monthlyChart"></canvas>
-{% else %}
-<p>No monthly data yet.</p>
-{% endif %}
+  <!-- Card 2: Bar -->
+  <div class="col-12 col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header">
+        <h5 class="mb-0">Monthly Income vs Expense</h5>
+      </div>
+      <div class="card-body d-flex justify-content-center">
+        {% if months|length > 0 %}
+          <div class="chart-box">
+            <canvas id="monthlyChart"></canvas>
+          </div>
+        {% else %}
+          <p class="text-muted m-0">No monthly data yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
     console.log("cat_labels:", {{ cat_labels|tojson }});

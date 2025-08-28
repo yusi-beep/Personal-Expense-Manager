@@ -10,3 +10,18 @@ h1, h3 {
 nav a {
     margin-right: 10px;
 }
+
+canvas {
+  max-width: 500px !important;
+  max-height: 300px !important;
+}
+
+.chart-box {
+  width: 500px;
+  height: 300px;
+  max-width: 100%;
+  position: relative; /* important for Chart.js with responsive */
+}
+
+.card { border-radius: 12px; }
+.card-header { background: #fff; border-bottom: 1px solid #eee; }

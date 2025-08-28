@@ -7,7 +7,7 @@
 		</th>
 		<th>
 			<nav>
-				<a href="{{ url_for('records.add') }}" class="btn btn-success">Add Record</a>
+				<a href="{{ url_for('records.add_record') }}" class="btn btn-success">Add Record</a>
 				<a href="{{ url_for('categories.add_category') }}" class="btn btn-success">Add Category</a>
 			</nav>
 		</th>
@@ -16,19 +16,19 @@
 
 <table class="table table-striped">
 	<tr>
-		<th>Date</th><th>Type</th><th>Category</th><th>Amount</th></th><th>Description</th>
-	</tr>
+		<th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Description</th><th>Actions</th>
+  	</tr>
 	{% for r in records %}
 	<tr>
-		<td>{{ r.date if r.date else r["date"] }}</td>
-        <td>{{ r.type if r.type else r["type"] }}</td>
-        <td>{{ r.category if r.category else r["category"] }}</td>
-        <td>{{ r.amount if r.amount else r["amount"] }}</td>
-        <td>{{ r.description if r.description else r["description"] }}</td>
-        <td>
-            <a href="{{ url_for('records.edit_record', index=loop.index0) }}" class="btn btn-warning btn-sm">Edit</a>
-            <a href="{{ url_for('records.delete_record', index=loop.index0) }}" class="btn btn-danger btn-sm">Delete</a>
-        </td>
+		<td>{{ r.date }}</td>
+		<td>{{ r.type }}</td>
+		<td>{{ r.category }}</td>
+		<td>{{ "%.2f"|format(r.amount) }}</td>
+		<td>{{ r.description }}</td>
+		<td>
+			<a href="{{ url_for('records.edit_record', id=r.id) }}" class="btn btn-warning btn-sm">Edit</a>
+			<a href="{{ url_for('records.delete_record', id=r.id) }}" class="btn btn-danger btn-sm">Delete</a>
+	    </td>
 	</tr>
 	{% endfor %}
 	
