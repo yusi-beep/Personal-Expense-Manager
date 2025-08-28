@@ -1,17 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
+
 <h3>Add Category</h3>
 <form method="POST">
-    <label>Category</label>
-    <input type="text" name="category" class="form-control" required>
-    <br>
-    <button type="submit" class="btn btn-success">Add</button>
+  <label>Category</label>
+  <input type="text" name="category" class="form-control" required>
+  <br>
+  <button type="submit" class="btn btn-success">Add</button>
 </form>
 
 <h4 class="mt-4">Existing Categories</h4>
 <ul>
-    {% for cat in categories %}
-        <li>{{ cat.name }}</li>
-    {% endfor %}
+  {% for cat in categories %}
+    <li>{{ cat.name }}</li>
+  {% endfor %}
 </ul>
 {% endblock %}
