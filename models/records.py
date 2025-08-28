@@ -74,4 +74,11 @@ def monthly_summary(records):
     expense_vals = [monthly_expense[m] for m in months]
 
     return months, income_vals, expense_vals
-    
+   
+def overwrite_records(records):
+    with open(FILE_NAME, "w", newline="", encoding="utf-8") as file:
+        fieldnames = ["date", "type", "category", "amount", "description"]
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(records)
+ 
