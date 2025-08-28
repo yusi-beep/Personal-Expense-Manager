@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+import csv
+import io
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
 from flask_login import login_required, current_user
 from models.models import db, Record, Category
 from decimal import Decimal, InvalidOperation
@@ -18,6 +20,158 @@ def list_records():
         records = q.order_by(Record.date.desc()).all()
 
     return render_template("records.html", records=records, sort=sort)
+
+@records_bp.route("/export/csv")
+@login_required
+def export_csv():
+    # can filter period query (?scope=&date=), there is all
+    records = Record.query.filter_by(user_id=current_user.id).order_by(Record.date.asc()).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output, lineterminator="\n")
+    writer.writerow(["date", "type", "category", "amount", "description"])
+    for r in records:
+        writer.writerow([r.date, r.type, r.category, f"{r.amount:.2f}", r.description or ""])
+
+    output.seek(0)
+    filename = f"records_{current_user.username}.csv"
+    return send_file(
+        io.BytesIO(output.getvalue().encode("utf-8-sig")),
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name=filename
+    )
+
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+
+@records_bp.route("/export/pdf")
+@login_required
+def export_pdf():
+    # selectable: filter period; there is only for user
+    records = Record.query.filter_by(user_id=current_user.id).order_by(Record.date.asc()).all()
+    income = sum(r.amount for r in records if r.type == "income")
+    expense = sum(r.amount for r in records if r.type == "expense")
+    balance = income - expense
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=landscape(A4), leftMargin=24, rightMargin=24, topMargin=24, bottomMargin=24)
+
+    styles = getSampleStyleSheet()
+    elems = []
+    elems.append(Paragraph(f"Expense Tracker — {current_user.username}", styles["Title"]))
+    elems.append(Paragraph(f"Summary: Income {income:.2f} BGN  |  Expense {expense:.2f} BGN  |  Balance {balance:.2f} BGN", styles["Normal"]))
+    elems.append(Spacer(1, 12))
+
+    data = [["Date", "Type", "Category", "Amount (BGN)", "Description"]]
+    for r in records:
+        data.append([r.date, r.type.title(), r.category, f"{r.amount:.2f}", r.description or ""])
+
+    table = Table(data, colWidths=[90, 70, 140, 100, 360])
+    table.setStyle(TableStyle([
+        ("GRID", (0,0), (-1,-1), 0.25, colors.grey),
+        ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#f3f4f6")),
+        ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+        ("ALIGN", (3,1), (3,-1), "RIGHT"),
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.white, colors.HexColor("#fcfcfc")]),
+    ]))
+    elems.append(table)
+
+    doc.build(elems)
+    buf.seek(0)
+    filename = f"records_{current_user.username}.pdf"
+    return send_file(buf, mimetype="application/pdf", as_attachment=True, download_name=filename)
+
+def _parse_date_any(s: str) -> str:
+    s = (s or "").strip()
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%-m/%-d/%Y", "%d/%m/%Y"):  # покриваме и EU
+        try:
+            return datetime.strptime(s, fmt).strftime("%Y-%m-%d")
+        except Exception:
+            pass
+    # fallback: rough split
+    try:
+        s2 = s.replace(".", "/").replace("-", "/")
+        parts = s2.split("/")
+        if len(parts) == 3:
+            # guess M/D/Y
+            m, d, y = [int(p) for p in parts]
+            return datetime(y, m, d).strftime("%Y-%m-%d")
+    except Exception:
+        pass
+    raise ValueError(f"Unrecognized date: {s}")
+
+@records_bp.route("/import/csv", methods=["POST"])
+@login_required
+def import_csv():
+    file = request.files.get("file")
+    create_missing_categories = request.form.get("create_missing_categories") == "on"
+
+    if not file or file.filename == "":
+        flash("Please choose a CSV file.", "danger")
+        return redirect(url_for("records.list_records"))
+
+    raw = file.read()  # <-- read only once
+    try:
+        content = raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        content = raw.decode("cp1251", errors="ignore")
+
+    reader = csv.DictReader(io.StringIO(content))
+
+    # Normalize column names → lower()
+    if reader.fieldnames:
+        reader.fieldnames = [fn.strip().lower() for fn in reader.fieldnames]
+
+    required = {"date", "type", "category", "amount", "description"}
+    if not required.issubset(set(reader.fieldnames or [])):
+        flash("CSV header must include: date,type,category,amount,description", "danger")
+        return redirect(url_for("records.list_records"))
+
+    existing_cats = {c.name.lower() for c in Category.query.filter_by(user_id=current_user.id).all()}
+    added_count = 0
+    error_count = 0
+
+    for raw_row in reader:
+        # normalize keys on each line (if there are whitespaces)
+        row = { (k or "").strip().lower(): (v or "").strip() for k, v in (raw_row or {}).items() }
+
+        try:
+            date = _parse_date_any(row.get("date", ""))
+            type_ = row.get("type", "").lower()
+            if type_ not in ("income", "expense"):
+                raise ValueError("Invalid type")
+
+            cat = row.get("category", "") or "Uncategorized"
+            amt = float(Decimal((row.get("amount", "").replace(",", ".") or "0")))
+            if amt <= 0:
+                raise ValueError("Amount must be positive")
+
+            desc = row.get("description", "")
+
+            if create_missing_categories and cat.lower() not in existing_cats:
+                db.session.add(Category(name=cat, user_id=current_user.id))
+                existing_cats.add(cat.lower())
+
+            db.session.add(Record(
+                date=date, type=type_, category=cat, amount=amt, description=desc, user_id=current_user.id
+            ))
+            added_count += 1
+
+        except Exception:
+            error_count += 1
+            continue
+
+    db.session.commit()
+    flash(
+        f"Imported {added_count} records." + (f" Skipped {error_count} invalid rows." if error_count else ""),
+        "warning" if error_count else "success"
+    )
+    return redirect(url_for("records.list_records"))
+
 
 @records_bp.route("/add", methods=["GET", "POST"])
 @login_required
@@ -45,14 +199,14 @@ def add_record():
                 raise InvalidOperation
         except (InvalidOperation, ValueError):
             flash("Amount must be a positive number.", "danger")
-            # върни и въведените стойности, за да не ги пишеш пак (по желание)
+            # return the entered values so you don't have to type them again (selectable)
             return render_template("add.html", categories=categories)
 
         rec = Record(
             date=date_val,
             type=entry_type,
             category=category,
-            amount=float(amount),  # съхраняваме като float
+            amount=float(amount),  # save float
             description=desc,
             user_id=current_user.id
         )
@@ -70,17 +224,27 @@ def edit_record(id):
     if record.user_id != current_user.id:
         return "Unauthorized", 403
     if request.method == "POST":
+        try:
+            amt = float(Decimal((request.form["amount"] or "").replace(",", ".")))
+            if amt <= 0:
+                raise InvalidOperation
+        except Exception:
+            flash("Amount must be a positive number.", "danger")
+            categories = Category.query.filter_by(user_id=current_user.id).all()
+            return render_template("edit_record.html", record=record, categories=categories)
+
         record.date = request.form.get("date") or record.date
         record.type = request.form["type"]
         record.category = request.form["category"]
-        record.amount = float(request.form["amount"])
+        record.amount = amt
         record.description = request.form["description"]
         db.session.commit()
+        flash("Record updated.", "success")
         return redirect(url_for("records.list_records"))
     categories = Category.query.filter_by(user_id=current_user.id).all()
     return render_template("edit_record.html", record=record, categories=categories)
 
-@records_bp.route("/delete/<int:id>")
+@records_bp.route("/delete/<int:id>", methods=["POST"])
 @login_required
 def delete_record(id):
     record = Record.query.get_or_404(id)
@@ -88,4 +252,6 @@ def delete_record(id):
         return "Unauthorized", 403
     db.session.delete(record)
     db.session.commit()
+    flash("Record deleted.", "success")
     return redirect(url_for("records.list_records"))
+
