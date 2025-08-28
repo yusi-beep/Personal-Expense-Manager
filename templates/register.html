@@ -2,14 +2,15 @@
 {% block content %}
 <h3>Register</h3>
 <form method="POST">
-    <label>Username</label>
-    <input type="text" name="username" class="form-control" required>
-    <label>Password</label>
-    <input type="password" name="password" class="form-control" required>
-    <br>
-    <button type="submit" class="btn btn-success">Register</button>
-        {% if error %}
-    <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
+  <label>Username</label>
+  <input type="text" name="username" class="form-control" value="{{ username or '' }}" required>
+
+  <label>Password</label>
+  <input type="password" name="password" class="form-control" required>
+
+  <br>
+  <button class="btn btn-success">Create account</button>
 </form>
+<p class="mt-2">Already have an account? <a href="{{ url_for('auth.login') }}">Login</a></p>
 {% endblock %}
+

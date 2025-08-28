@@ -10,9 +10,20 @@
 </form>
 
 <h4 class="mt-4">Existing Categories</h4>
-<ul>
+<ul class="list-group">
   {% for cat in categories %}
-    <li>{{ cat.name }}</li>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div class="flex-grow-1">
+        <strong>{{ cat.name }}</strong>
+        <form class="d-inline-flex ms-2" method="POST" action="{{ url_for('categories.rename_category', id=cat.id) }}">
+          <input type="text" name="new_name" class="form-control form-control-sm" placeholder="Rename to…" required>
+          <button class="btn btn-sm btn-outline-primary ms-1">Rename</button>
+        </form>
+      </div>
+      <form method="POST" action="{{ url_for('categories.delete_category', id=cat.id) }}" class="m-0">
+        <button class="btn btn-sm btn-outline-danger">Delete</button>
+      </form>
+    </li>
   {% endfor %}
 </ul>
 {% endblock %}

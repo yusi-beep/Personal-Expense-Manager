@@ -2,11 +2,19 @@
 {% block content %}
 <h3>Login</h3>
 <form method="POST">
-    <label>Username</label>
-    <input type="text" name="username" class="form-control" required>
-    <label>Password</label>
-    <input type="password" name="password" class="form-control" required>
-    <br>
-    <button type="submit" class="btn btn-primary">Login</button>
+  <label>Username</label>
+  <input type="text" name="username" class="form-control" value="{{ username or '' }}" required>
+
+  <label>Password</label>
+  <input type="password" name="password" class="form-control" required>
+
+  <div class="form-check mt-2">
+    <input class="form-check-input" type="checkbox" name="remember" id="remember">
+    <label class="form-check-label" for="remember">Remember me</label>
+  </div>
+
+  <br>
+  <button class="btn btn-primary">Login</button>
 </form>
+<p class="mt-2">No account? <a href="{{ url_for('auth.register') }}">Register</a></p>
 {% endblock %}

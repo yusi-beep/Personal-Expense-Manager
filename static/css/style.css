@@ -1,29 +1,238 @@
-body {
-    background-color: #f8f9fa;
-    font-family: Arial, sans-serif;
+/* ---------- Design tokens ---------- */
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --primary:#4f46e5;   /* indigo */
+  --accent:#06b6d4;    /* cyan */
+  --success:#16a34a;
+  --danger:#dc2626;
+  --border:#e5e7eb;
+  --shadow: 0 6px 24px rgba(15, 23, 42, .06);
+  --shadow-sm: 0 3px 10px rgba(15, 23, 42, .04);
 }
 
-h1, h3 {
-    color: #333;
+/* Dark mode (selectable): add class="theme-dark" in <body> */
+.theme-dark{
+  --bg:#0b1220;
+  --card:#0f172a;
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+  --primary:#6366f1;
+  --accent:#22d3ee;
+  --success:#22c55e;
+  --danger:#f87171;
+  --border:#1f2937;
+  --shadow: 0 6px 24px rgba(0,0,0,.4);
+  --shadow-sm: 0 3px 10px rgba(0,0,0,.35);
 }
 
-nav a {
-    margin-right: 10px;
+/* ---------- Base ---------- */
+html,body{height:100%}
+body{ 
+    background: var(--bg); color: var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .navbar { background: var(--card)!important; border-bottom:1px solid var(--border)!important; }
+    .nav-link.active { font-weight: 700; color: var(--primary)!important; 
 }
 
-canvas {
-  max-width: 600px !important;
-  max-height: 300px !important;
+h1,h2,h3,h4{color:var(--text)}
+a{color:var(--primary)}
+hr{border-color:var(--border)}
+
+/* ---------- Header / Nav ---------- */
+h1{
+  font-weight:800;
+  letter-spacing:.2px;
+}
+nav a.btn{
+  margin-right:.5rem;
+  border-radius:12px;
+  box-shadow: var(--shadow-sm);
+  border:1px solid var(--border);
+}
+nav a.btn:hover{transform:translateY(-1px); transition:.15s ease}
+
+/* ---------- Cards ---------- */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow: var(--shadow);
+}
+.card-header{
+  background:transparent;
+  border-bottom:1px dashed var(--border);
+}
+.card-header h5{font-weight:700}
+
+/* „lifting“ at hover */
+.card:hover{transform:translateY(-2px); transition:.18s ease}
+
+/* ---------- KPI badges (selectable, in Summary) ---------- */
+.kpi{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:var(--shadow-sm);
+  padding:16px 18px;
+}
+.kpi .label{color:var(--muted); font-size:.9rem}
+.kpi .value{font-size:1.35rem; font-weight:800}
+
+/* ---------- Tables ---------- */
+.table{
+  --bs-table-bg: transparent;
+}
+.table thead th{
+  border-bottom:1px solid var(--border);
+  color:var(--muted);
+}
+.table tbody td{
+  vertical-align: middle;
+}
+.table-striped>tbody>tr:nth-of-type(odd)>*{
+  background: rgba(99,102,241,.04); /* лек индиго оттенък */
 }
 
-.chart-box {
-  width: 600px;
-  height: 300px;
-  max-width: 100%;
-  position: relative; /* important for Chart.js with responsive */
+/* ---------- Forms ---------- */
+.form-control, .form-select{
+  border-radius:12px;
+  border:1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+}
+.form-control:focus, .form-select:focus{
+  box-shadow:0 0 0 .2rem rgba(79,70,229,.15);
+  border-color: var(--primary);
 }
 
-.card { border-radius: 12px; }
-.card-header { background: #fff; border-bottom: 1px solid #eee; }
+/* ---------- Buttons ---------- */
+.btn-primary, .btn-success, .btn-secondary, .btn-warning, .btn-danger, .btn-outline-primary, .btn-outline-secondary{
+  border-radius:12px !important;
+}
 
-.btn-group .btn.active { color:#fff; }
+/* active button in group (Day/Week/Month/Year) */
+.btn-group .btn.active{color:#fff; background:var(--primary); border-color:var(--primary)}
+
+/* ---------- Alerts ---------- */
+.alert{
+  border-radius:12px;
+  border:1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- Charts ---------- */
+/* compact 400x400, responsive in container */
+.chart-box{
+  width:400px;
+  height:400px;
+  max-width:100%;
+  position:relative;
+}
+canvas{
+  max-width:100% !important;
+  max-height:100% !important;
+}
+
+/* ---------- Utilities ---------- */
+.text-muted{color:var(--muted)!important}
+.shadow-soft{box-shadow:var(--shadow)}
+.rounded-2xl{border-radius:16px}
+
+/* ===== DARK MODE OVERRIDES ===== */
+body.theme-dark{
+  background-color:#0b1220;
+  color:#e5e7eb;
+}
+
+/* Navbar / header */
+body.theme-dark .navbar{
+  background:#111827 !important;             /* малко по-светъл от body */
+  border-bottom:1px solid #1f2937 !important;
+}
+body.theme-dark .navbar .navbar-brand{ color:#f9fafb !important; }
+body.theme-dark .navbar .nav-link{ color:#d1d5db !important; }
+body.theme-dark .navbar .nav-link.active{
+  color:#60a5fa !important;
+  font-weight:600;
+}
+
+/* Cards / panels / sections */
+body.theme-dark .card{
+  background:#e5e7eb;
+  border:1px solid #1f2937;
+  color:#e5e7eb;
+  box-shadow:none;
+}
+body.theme-dark .card-header{
+  background:#1f2937 !important;
+  color:#f3f4f6;
+  border-bottom:1px solid #374151 !important;
+}
+
+/* KPI tiles (Income / Expense / Balance) */
+body.theme-dark .kpi{
+  background:#0f172a;
+  border:1px solid #1f2937;
+  color:#e5e7eb;
+}
+body.theme-dark .kpi .label{ color:#94a3b8; }
+body.theme-dark .kpi .value{ color:#e5e7eb; }  /* Балансът вече е видим */
+
+/* Tables */
+body.theme-dark .table{ color:#e5e7eb; border-color:#1f2937; }
+body.theme-dark .table thead th{
+  background:#1f2937;
+  color:#93c5fd;                               /* синкав акцент за хедъра */
+  border-bottom:1px solid #374151;
+}
+body.theme-dark .table-striped > tbody > tr:nth-of-type(odd) > *{ background:#111827; }
+body.theme-dark .table-striped > tbody > tr:nth-of-type(even) > *{ background:#1f2937; }
+body.theme-dark .table-hover tbody tr:hover > *{ background:#374151; }
+
+/* Forms */
+body.theme-dark .form-control,
+body.theme-dark .form-select{
+  background:#0f172a;
+  color:#e5e7eb;
+  border-color:#1f2937;
+}
+body.theme-dark .form-control::placeholder{ color:#94a3b8; }
+body.theme-dark .form-control:focus,
+body.theme-dark .form-select:focus{
+  border-color:#334155;
+  box-shadow:0 0 0 .2rem rgba(99,102,241,.18);
+}
+
+/* Buttons */
+body.theme-dark .btn-outline-secondary{ color:#e5e7eb; border-color:#475569; }
+body.theme-dark .btn:hover{ filter:brightness(1.08); }
+body.theme-dark .btn-warning{ color:#111827; }   /* по-четим текст върху жълто */
+
+/* Alerts */
+body.theme-dark .alert{
+  background:#111827;
+  color:#e5e7eb;
+  border:1px solid #1f2937;
+}
+
+/* Dividers */
+body.theme-dark hr{ border-color:#1f2937; }
+
+/* Chart containers */
+body.theme-dark .chart-box{
+  background:#e5e7eb;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+}
+
+body.theme-dark .table tbody td {
+  color: #e0e7ff;        
+}
+
+/* Canvas should stay transparent / default, unaffected by dark mode */
+body.theme-dark canvas {
+  background: transparent !important;
+  color: inherit;   /* for text, if Chart.js write labels */
+}
