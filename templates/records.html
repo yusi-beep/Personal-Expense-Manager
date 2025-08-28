@@ -16,7 +16,16 @@
 
 <table class="table table-striped">
 	<tr>
-		<th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Description</th><th>Actions</th>
+		<th>
+			<a href="{{ url_for('records.list_records', sort='asc' if sort=='desc' else 'desc') }}" class="text-decoration-none">
+			Date
+			{% if sort == 'asc' %}
+            	▲
+          	{% else %}
+            	▼
+         	{% endif %}
+        </a>
+		</th><th>Type</th><th>Category</th><th>Amount</th><th>Description</th><th>Actions</th>
   	</tr>
 	{% for r in records %}
 	<tr>

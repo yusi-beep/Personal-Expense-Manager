@@ -7,8 +7,15 @@ records_bp = Blueprint("records", __name__, url_prefix="/records")
 @records_bp.route("/")
 @login_required
 def list_records():
-    records = Record.query.filter_by(user_id=current_user.id).all()
-    return render_template("records.html", records=records)
+    sort = request.args.get("sort", "desc") 
+    q = Record.query.filter_by(user_id=current_user.id)
+
+    if sort == "asc":
+        records = q.order_by(Record.date.asc()).all()
+    else:
+        records = q.order_by(Record.date.desc()).all()
+
+    return render_template("records.html", records=records, sort=sort)
 
 @records_bp.route("/add", methods=["GET", "POST"])
 @login_required
