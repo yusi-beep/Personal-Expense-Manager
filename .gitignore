@@ -2,3 +2,7 @@
 readme.md
 *.txt
 __pycache__
+.env
+expense.db
+*.pyc
+instance/
