@@ -17,6 +17,14 @@ def list_records():
     page_str = request.args.get("page", "1")
     per_str  = request.args.get("per", "20")
 
+    # filters
+    f_category = (request.args.get("category") or "").strip()
+    f_type     = (request.args.get("entry_type") or "").strip()    # 'income' | 'expense' | ''
+    f_from     = (request.args.get("date_from") or "").strip()    # 'YYYY-MM-DD'
+    f_to       = (request.args.get("date_to") or "").strip()      # 'YYYY-MM-DD'
+    f_q        = (request.args.get("q") or "").strip()       # search in description
+
+    # sanitize pagination
     try:
         page = max(1, int(page_str))
     except ValueError:
@@ -30,6 +38,23 @@ def list_records():
     # base query
     q = Record.query.filter_by(user_id=current_user.id)
 
+    # ------- Apply filters -------
+    if f_category:
+        q = q.filter(Record.category == f_category)
+
+    if f_type in ("income", "expense"):
+        q = q.filter(Record.type == f_type)
+
+    # Record.date is 'YYYY-MM-DD' 
+    if f_from:
+        q = q.filter(Record.date >= f_from)
+    if f_to:
+        q = q.filter(Record.date <= f_to)
+
+    if f_q:
+        # simple "contains" on description (case-insensitive за SQLite)
+        q = q.filter(Record.description.ilike(f"%{f_q}%"))
+
     # sort per date
     order_col = asc(Record.date) if sort == "asc" else desc(Record.date)
     q = q.order_by(order_col)
@@ -37,6 +62,9 @@ def list_records():
     # paginate (Flask-SQLAlchemy 3.x)
     pagination = db.paginate(q, page=page, per_page=per_page, error_out=False)
     records = pagination.items
+
+    # for select „Category“ 
+    categories = Category.query.filter_by(user_id=current_user.id).order_by(Category.name.asc()).all()
 
     # calculate window for pages 
     p = pagination.page
@@ -47,10 +75,13 @@ def list_records():
     return render_template(
         "records.html",
         records=records,
+        categories=categories, # for select
         sort=sort,
         per=per_str,
-        pagination=pagination,
-        p=p, total=total, start=start, end=end
+        # pagination state
+        pagination=pagination, p=p, total=total, start=start, end=end,
+        # current filters (за sticky UI)
+        f_category=f_category, f_type=f_type, f_from=f_from, f_to=f_to, f_q=f_q
     )
 
 @records_bp.route("/export/csv")

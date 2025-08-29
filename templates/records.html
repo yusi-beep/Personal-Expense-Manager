@@ -29,6 +29,12 @@
 		<form class="ms-auto d-flex align-items-center gap-2"
 			method="get" action="{{ url_for('records.list_records') }}">
 			<input type="hidden" name="sort" value="{{ sort }}">
+			<!-- Add: keep active filters -->
+			<input type="hidden" name="category"   value="{{ f_category }}">
+			<input type="hidden" name="entry_type" value="{{ f_type }}">
+			<input type="hidden" name="date_from"  value="{{ f_from }}">
+			<input type="hidden" name="date_to"    value="{{ f_to }}">
+			<input type="hidden" name="q"          value="{{ f_q }}">
 			<label class="text-muted small mb-0">Per page</label>
 			<select name="per" class="form-select form-select-sm" onchange="this.form.submit()">
 			{% for opt in [10,20,50,100] %}
@@ -39,6 +45,64 @@
 	</div>
 </div>
 
+<!-- FILTERS -->
+	<div class="card-body d-flex flex-wrap align-items-center gap-2">		
+		<div class="card mb-3">
+		  <div class="card-body">
+		    <form class="row g-2 align-items-end" method="get" action="{{ url_for('records.list_records') }}">
+		      <!-- скрити полета: да запазим пер и сортиране при филтър -->
+		      <input type="hidden" name="sort" value="{{ sort }}">
+		      <input type="hidden" name="per"  value="{{ per }}">
+
+		      <div class="col-12 col-md-3">
+		        <label class="form-label">Category</label>
+		        <select name="category" class="form-select">
+		          <option value="">All</option>
+		          {% for c in categories %}
+		            <option value="{{ c.name }}" {% if f_category==c.name %}selected{% endif %}>{{ c.name }}</option>
+		          {% endfor %}
+		        </select>
+		      </div>
+
+		      <div class="col-6 col-md-2">
+		        <label class="form-label">Type</label>
+		        <select name="entry_type" class="form-select">
+		          <option value="" {% if not f_type %}selected{% endif %}>All</option>
+		          <option value="income"  {% if f_type=='income' %}selected{% endif %}>Income</option>
+		          <option value="expense" {% if f_type=='expense' %}selected{% endif %}>Expense</option>
+		        </select>
+		      </div>
+
+		      <div class="col-6 col-md-2">
+		        <label class="form-label">From</label>
+		        <input type="date" name="date_from" class="form-control" value="{{ f_from }}">
+		      </div>
+
+		      <div class="col-6 col-md-2">
+		        <label class="form-label">To</label>
+		        <input type="date" name="date_to" class="form-control" value="{{ f_to }}">
+		      </div>
+
+		      <div class="col-6 col-md-2">
+		        <label class="form-label">Search</label>
+		        <input type="text" name="q" class="form-control" placeholder="Description…" value="{{ f_q }}">
+		      </div>
+
+		      <div class="col-12 col-md-1 d-grid">
+		        <button class="btn btn-primary">Filter</button>
+		      </div>
+
+		      <div class="col-12 col-md-1 d-grid">
+		        <a class="btn btn-outline-secondary"
+		           href="{{ url_for('records.list_records', sort=sort, per=per) }}">Reset</a>
+		      </div>
+		    </form>
+		  </div>
+		</div>
+
+	</div>
+
+
 {% if records|length == 0 %}
 	<div class="alert alert-info">No records yet. Use <b>Add Record</b> to create your first entry.</div>
 {% else %}
@@ -46,7 +110,7 @@
 		<thead>
 			<tr>
 				<th style="min-width:140px">
-					<a href="{{ url_for('records.list_records', sort='asc' if sort=='desc' else 'desc', page=1, per=per) }}" class="text-decoration-none">
+					<a href="{{ url_for('records.list_records', sort='asc' if sort=='desc' else 'desc', page=1, per=per, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}" class="text-decoration-none">
 			            Date
 						{% if sort == 'asc' %}
 							▲
@@ -90,35 +154,35 @@
 	  <ul class="pagination">
 	    <!-- First / Prev -->
 	    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-	      <a class="page-link" href="{{ url_for('records.list_records', page=1, per=per, sort=sort) }}">&laquo;</a>
+	      <a class="page-link" href="{{ url_for('records.list_records', page=1, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">&laquo;</a>
 	    </li>
 	    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-	      <a class="page-link" href="{{ url_for('records.list_records', page=pagination.prev_num, per=per, sort=sort) }}">Prev</a>
+	      <a class="page-link" href="{{ url_for('records.list_records', page=pagination.prev_num, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">Prev</a>
 	    </li>
 
 	    <!-- Page numbers window -->
 	    {% if start > 1 %}
-	      <li class="page-item"><a class="page-link" href="{{ url_for('records.list_records', page=1, per=per, sort=sort) }}">1</a></li>
+	      <li class="page-item"><a class="page-link" href="{{ url_for('records.list_records', page=1, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">1</a></li>
 	      {% if start > 2 %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
 	    {% endif %}
 
 	    {% for page_no in range(start, end + 1) %}
 	      <li class="page-item {% if page_no == p %}active{% endif %}">
-	        <a class="page-link" href="{{ url_for('records.list_records', page=page_no, per=per, sort=sort) }}">{{ page_no }}</a>
+	        <a class="page-link" href="{{ url_for('records.list_records', page=page_no, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">{{ page_no }}</a>
 	      </li>
 	    {% endfor %}
 
 	    {% if end < total %}
 	      {% if end < total - 1 %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
-	      <li class="page-item"><a class="page-link" href="{{ url_for('records.list_records', page=total, per=per, sort=sort) }}">{{ total }}</a></li>
+	      <li class="page-item"><a class="page-link" href="{{ url_for('records.list_records', page=total, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">{{ total }}</a></li>
 	    {% endif %}
 
 	    <!-- Next / Last -->
 	    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-	      <a class="page-link" href="{{ url_for('records.list_records', page=pagination.next_num, per=per, sort=sort) }}">Next</a>
+	      <a class="page-link" href="{{ url_for('records.list_records', page=pagination.next_num, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">Next</a>
 	    </li>
 	    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-	      <a class="page-link" href="{{ url_for('records.list_records', page=total, per=per, sort=sort) }}">&raquo;</a>
+	      <a class="page-link" href="{{ url_for('records.list_records', page=total, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">&raquo;</a>
 	    </li>
 	  </ul>
 	</nav>
