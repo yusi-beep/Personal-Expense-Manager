@@ -19,11 +19,14 @@ def create_app():
     db.init_app(app)
 
     # Blueprints
+    from routes.api import api_bp
     from routes.auth import auth_bp
     from routes.home import home_bp
     from routes.records import records_bp
     from routes.categories import categories_bp
+    
 
+    app.register_blueprint(api_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(home_bp)
     app.register_blueprint(records_bp)
