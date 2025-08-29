@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint
 from flask_login import UserMixin
 
 db = SQLAlchemy()
@@ -26,6 +27,10 @@ class Category(db.Model):
     name = db.Column(db.String(50), nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'name', name='uq_user_category_name'),
+    )
 
     def __repr__(self):
         return f"<Category {self.name}>"

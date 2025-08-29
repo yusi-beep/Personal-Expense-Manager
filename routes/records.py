@@ -170,14 +170,29 @@ def _parse_date_any(s: str) -> str:
 @records_bp.route("/import/csv", methods=["POST"])
 @login_required
 def import_csv():
+    ALLOWED_MIME = {"text/csv", "application/vnd.ms-excel"}
+    MAX_BYTES = 5 * 1024 * 1024  # 5MB
+
     file = request.files.get("file")
     create_missing_categories = request.form.get("create_missing_categories") == "on"
 
-    if not file or file.filename == "":
+    # Is the file present
+    if not file or file.filename.strip() == "":
         flash("Please choose a CSV file.", "danger")
         return redirect(url_for("records.list_records"))
 
-    raw = file.read()  # <-- read only once
+    # quick extension check
+    if not file.filename.lower().endswith(".csv"):
+        flash("Please upload a .csv file.", "danger")
+        return redirect(url_for("records.list_records"))
+
+    # read once and check size
+    raw = file.read()
+    if len(raw) > MAX_BYTES:
+        flash("CSV is too large (max 5MB).", "danger")
+        return redirect(url_for("records.list_records"))
+
+    # try for decoding
     try:
         content = raw.decode("utf-8-sig")
     except UnicodeDecodeError:
@@ -185,56 +200,78 @@ def import_csv():
 
     reader = csv.DictReader(io.StringIO(content))
 
-    # Normalize column names → lower()
+    # normalise header's
     if reader.fieldnames:
-        reader.fieldnames = [fn.strip().lower() for fn in reader.fieldnames]
+        reader.fieldnames = [ (fn or "").strip().lower() for fn in reader.fieldnames ]
 
     required = {"date", "type", "category", "amount", "description"}
     if not required.issubset(set(reader.fieldnames or [])):
         flash("CSV header must include: date,type,category,amount,description", "danger")
         return redirect(url_for("records.list_records"))
 
+    # cash for existing categories for this  user (case-insensitive)
     existing_cats = {c.name.lower() for c in Category.query.filter_by(user_id=current_user.id).all()}
-    added_count = 0
-    error_count = 0
 
-    for raw_row in reader:
-        # normalize keys on each line (if there are whitespaces)
+    added_count = 0
+    errors = []  # keep row numbers (start from 2, becouse row  1 is header)
+
+    for i, raw_row in enumerate(reader, start=2):
+        # normalize keys/values (strip)
         row = { (k or "").strip().lower(): (v or "").strip() for k, v in (raw_row or {}).items() }
 
         try:
+            # date
             date = _parse_date_any(row.get("date", ""))
-            type_ = row.get("type", "").lower()
+
+            # type
+            type_ = (row.get("type", "") or "").lower()
             if type_ not in ("income", "expense"):
                 raise ValueError("Invalid type")
 
-            cat = row.get("category", "") or "Uncategorized"
-            amt = float(Decimal((row.get("amount", "").replace(",", ".") or "0")))
+            # category
+            cat = row.get("category", "")
+            if not cat:
+                cat = "Uncategorized"
+
+            # amount
+            amt_raw = (row.get("amount", "") or "").replace(",", ".")
+            amt = float(Decimal(amt_raw))
             if amt <= 0:
                 raise ValueError("Amount must be positive")
 
+            # description
             desc = row.get("description", "")
 
+            # if necessary, create a missing category (for this user), keep in set avoidable dublicates
             if create_missing_categories and cat.lower() not in existing_cats:
                 db.session.add(Category(name=cat, user_id=current_user.id))
                 existing_cats.add(cat.lower())
 
+            # record
             db.session.add(Record(
-                date=date, type=type_, category=cat, amount=amt, description=desc, user_id=current_user.id
+                date=date,
+                type=type_,
+                category=cat,
+                amount=amt,
+                description=desc,
+                user_id=current_user.id
             ))
             added_count += 1
 
         except Exception:
-            error_count += 1
+            errors.append(i)
             continue
 
     db.session.commit()
-    flash(
-        f"Imported {added_count} records." + (f" Skipped {error_count} invalid rows." if error_count else ""),
-        "warning" if error_count else "success"
-    )
-    return redirect(url_for("records.list_records"))
 
+    # message to 10 number   of mising lines
+    if errors:
+        skip_info = ", ".join(map(str, errors[:10])) + (" ..." if len(errors) > 10 else "")
+        flash(f"Imported {added_count} records. Skipped rows: {skip_info}", "warning")
+    else:
+        flash(f"Imported {added_count} records.", "success")
+
+    return redirect(url_for("records.list_records"))
 
 @records_bp.route("/add", methods=["GET", "POST"])
 @login_required
@@ -280,31 +317,57 @@ def add_record():
 
     return render_template("add.html", categories=categories)
 
-@records_bp.route("/edit/<int:id>", methods=["GET", "POST"])
+@records_bp.route("/edit/<int:id>", methods=["GET","POST"])
 @login_required
 def edit_record(id):
     record = Record.query.get_or_404(id)
     if record.user_id != current_user.id:
         return "Unauthorized", 403
+
+    categories = Category.query.filter_by(user_id=current_user.id).order_by(Category.name.asc()).all()
+
     if request.method == "POST":
+        entry_type = (request.form.get("type") or "").strip().lower()
+        category   = (request.form.get("category") or "").strip()
+        date_val   = (request.form.get("date") or record.date).strip()
+        desc       = (request.form.get("description") or "").strip()
+        amt_raw    = (request.form.get("amount") or "").replace(",", ".").strip()
+
+        # type
+        if entry_type not in ("income", "expense"):
+            flash("Invalid type. Choose Income or Expense.", "danger")
+            return render_template("edit_record.html", record=record, categories=categories)
+
+        # date
         try:
-            amt = float(Decimal((request.form["amount"] or "").replace(",", ".")))
-            if amt <= 0:
+            datetime.strptime(date_val, "%Y-%m-%d")
+        except ValueError:
+            flash("Date must be YYYY-MM-DD.", "danger")
+            return render_template("edit_record.html", record=record, categories=categories)
+
+        # category (must exist for this user)
+        if not any(c.name == category for c in categories):
+            flash("Please pick an existing category.", "danger")
+            return render_template("edit_record.html", record=record, categories=categories)
+
+        # amount
+        try:
+            amount = Decimal(amt_raw)
+            if amount <= 0:
                 raise InvalidOperation
         except Exception:
             flash("Amount must be a positive number.", "danger")
-            categories = Category.query.filter_by(user_id=current_user.id).all()
             return render_template("edit_record.html", record=record, categories=categories)
 
-        record.date = request.form.get("date") or record.date
-        record.type = request.form["type"]
-        record.category = request.form["category"]
-        record.amount = amt
-        record.description = request.form["description"]
+        record.type = entry_type
+        record.category = category
+        record.date = date_val
+        record.amount = float(amount)
+        record.description = desc
         db.session.commit()
         flash("Record updated.", "success")
         return redirect(url_for("records.list_records"))
-    categories = Category.query.filter_by(user_id=current_user.id).all()
+
     return render_template("edit_record.html", record=record, categories=categories)
 
 @records_bp.route("/delete/<int:id>", methods=["POST"])

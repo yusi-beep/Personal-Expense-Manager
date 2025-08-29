@@ -4,13 +4,13 @@
 <h3>Add Record</h3>
 <form method="POST">
   <label>Date</label>
-  <input type="date" name="date" class="form-control">
+  <input type="date" name="date" class="form-control" value="{{ record.date if record else '' }}" required>
 
   <label>Type</label>
   <select name="type" class="form-control" required>
     <option value="" disabled selected>-- Select type --</option>
-    <option value="income">Income</option>
-    <option value="expense">Expense</option>
+    <option value="income"  {{ 'selected' if record and record.type=='income' }}>Income</option>
+  <option value="expense" {{ 'selected' if record and record.type=='expense' }}>Expense</option>
   </select>
 
   <label>Category</label>
