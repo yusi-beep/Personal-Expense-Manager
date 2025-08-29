@@ -26,6 +26,16 @@
 			</div>
 			<button class="btn btn-success btn-sm" type="submit">Import CSV</button>
 		</form>
+		<form class="ms-auto d-flex align-items-center gap-2"
+			method="get" action="{{ url_for('records.list_records') }}">
+			<input type="hidden" name="sort" value="{{ sort }}">
+			<label class="text-muted small mb-0">Per page</label>
+			<select name="per" class="form-select form-select-sm" onchange="this.form.submit()">
+			{% for opt in [10,20,50,100] %}
+				<option value="{{ opt }}" {% if per|string == opt|string %}selected{% endif %}>{{ opt }}</option>
+			{% endfor %}
+			</select>
+		</form>
 	</div>
 </div>
 
@@ -36,8 +46,7 @@
 		<thead>
 			<tr>
 				<th style="min-width:140px">
-					<a href="{{ url_for('records.list_records', sort='asc' if sort=='desc' else 'desc') }}"
-						class="text-decoration-none">
+					<a href="{{ url_for('records.list_records', sort='asc' if sort=='desc' else 'desc', page=1, per=per) }}" class="text-decoration-none">
 			            Date
 						{% if sort == 'asc' %}
 							▲
@@ -76,6 +85,45 @@
 		{% endfor %}
 	</tbody>
 	</table>
+	{% if pagination and total > 1 %}
+	<nav aria-label="Records pagination" class="mt-3">
+	  <ul class="pagination">
+	    <!-- First / Prev -->
+	    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+	      <a class="page-link" href="{{ url_for('records.list_records', page=1, per=per, sort=sort) }}">&laquo;</a>
+	    </li>
+	    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+	      <a class="page-link" href="{{ url_for('records.list_records', page=pagination.prev_num, per=per, sort=sort) }}">Prev</a>
+	    </li>
+
+	    <!-- Page numbers window -->
+	    {% if start > 1 %}
+	      <li class="page-item"><a class="page-link" href="{{ url_for('records.list_records', page=1, per=per, sort=sort) }}">1</a></li>
+	      {% if start > 2 %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+	    {% endif %}
+
+	    {% for page_no in range(start, end + 1) %}
+	      <li class="page-item {% if page_no == p %}active{% endif %}">
+	        <a class="page-link" href="{{ url_for('records.list_records', page=page_no, per=per, sort=sort) }}">{{ page_no }}</a>
+	      </li>
+	    {% endfor %}
+
+	    {% if end < total %}
+	      {% if end < total - 1 %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+	      <li class="page-item"><a class="page-link" href="{{ url_for('records.list_records', page=total, per=per, sort=sort) }}">{{ total }}</a></li>
+	    {% endif %}
+
+	    <!-- Next / Last -->
+	    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+	      <a class="page-link" href="{{ url_for('records.list_records', page=pagination.next_num, per=per, sort=sort) }}">Next</a>
+	    </li>
+	    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+	      <a class="page-link" href="{{ url_for('records.list_records', page=total, per=per, sort=sort) }}">&raquo;</a>
+	    </li>
+	  </ul>
+	</nav>
+	{% endif %}
+
 {% endif %}
 
 {% endblock %}

@@ -1,5 +1,6 @@
 import csv
 import io
+from sqlalchemy import desc, asc
 from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
 from flask_login import login_required, current_user
 from models.models import db, Record, Category
@@ -11,15 +12,46 @@ records_bp = Blueprint("records", __name__, url_prefix="/records")
 @records_bp.route("/")
 @login_required
 def list_records():
-    sort = request.args.get("sort", "desc") 
+    # URL params
+    sort = request.args.get("sort", "desc")                 # 'asc' | 'desc'
+    page_str = request.args.get("page", "1")
+    per_str  = request.args.get("per", "20")
+
+    try:
+        page = max(1, int(page_str))
+    except ValueError:
+        page = 1
+    try:
+        per_page = max(5, min(100, int(per_str)))          # clamp 5..100
+    except ValueError:
+        per_page = 20
+        per_str = "20"
+
+    # base query
     q = Record.query.filter_by(user_id=current_user.id)
 
-    if sort == "asc":
-        records = q.order_by(Record.date.asc()).all()
-    else:
-        records = q.order_by(Record.date.desc()).all()
+    # sort per date
+    order_col = asc(Record.date) if sort == "asc" else desc(Record.date)
+    q = q.order_by(order_col)
 
-    return render_template("records.html", records=records, sort=sort)
+    # paginate (Flask-SQLAlchemy 3.x)
+    pagination = db.paginate(q, page=page, per_page=per_page, error_out=False)
+    records = pagination.items
+
+    # calculate window for pages 
+    p = pagination.page
+    total = pagination.pages
+    start = 1 if p - 2 <= 1 else p - 2
+    end   = total if p + 2 >= total else p + 2
+
+    return render_template(
+        "records.html",
+        records=records,
+        sort=sort,
+        per=per_str,
+        pagination=pagination,
+        p=p, total=total, start=start, end=end
+    )
 
 @records_bp.route("/export/csv")
 @login_required

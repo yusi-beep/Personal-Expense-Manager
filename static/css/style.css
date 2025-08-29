@@ -236,3 +236,13 @@ body.theme-dark canvas {
   background: transparent !important;
   color: inherit;   /* for text, if Chart.js write labels */
 }
+
+body.theme-dark .pagination .page-link {
+  background: #111827;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+body.theme-dark .pagination .page-item.active .page-link {
+  background: #4f46e5;
+  border-color: #4f46e5;
+}
