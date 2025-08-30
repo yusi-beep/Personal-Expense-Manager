@@ -1,0 +1,27 @@
+# python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# virtual envs
+.venv/
+venv/
+
+# editor/IDE
+.vscode/
+.idea/
+
+# local env & db/artifacts
+.env
+*.db
+*.csv
+*.pdf
+/tests/output/
+exports/
+expense.db
+
+# git
+.git/
+.gitignore
