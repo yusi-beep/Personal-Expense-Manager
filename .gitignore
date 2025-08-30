@@ -1,6 +1,4 @@
 *.csv
-readme.md
-*.txt
 __pycache__
 .env
 expense.db
@@ -11,3 +9,4 @@ exportts/
 *.csv
 *.pdf
 /tests/output/
+docs/
