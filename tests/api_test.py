@@ -8,7 +8,7 @@ USERNAME = "admin"
 PASSWORD = "admin"
 
 def main():
-    # === 1) LOGIN ===
+    # === 1) LOGIN ====
     r = requests.post(f"{BASE}/login", json={"username": USERNAME, "password": PASSWORD})
     assert r.status_code == 200, f"Login failed: {r.text}"
     token = r.json()["token"]
