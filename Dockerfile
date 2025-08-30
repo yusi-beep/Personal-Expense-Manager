@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Системни зависимости за reportlab/pillow
+# System dependencies for reportlab/pillow
 RUN apt-get update && apt-get install -y --no-install-recommends \
       build-essential \
       libfreetype6-dev \
@@ -14,11 +14,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Зависимости
+# Dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Код
+# Code
 COPY . .
 
 # Flask env
@@ -28,5 +28,5 @@ ENV FLASK_APP=app.py \
 
 EXPOSE 5000
 
-# По подразбиране стартираме приложението
+# By default, we launch the application
 CMD ["flask", "run"]
