@@ -1,26 +1,17 @@
 version: "3.9"
 
 services:
-  web:
-    build: .
-    container_name: expense-web
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: expense-tracker
     ports:
       - "5000:5000"
-    env_file: .env
+    env_file:
+      - .env
     volumes:
-      - ./expense.db:/app/expense.db
-    environment:
-      - APP_ENV=development
-
-  test:
-    build: .
-    container_name: expense-test
-    depends_on:
-      - web
-    env_file: .env
-    environment:
-      - API_BASE=http://web:5000/api
-    command: >
-      sh -c "flask run --host=0.0.0.0 & 
-             sleep 3 && 
-             python tests/api_test.py"
+      - ./expense.db:/app/expense.db   # persist база
+      - ./static:/app/static           # статични файлове (CSS/JS)
+      - ./templates:/app/templates     # HTML темплейти
+    restart: unless-stopped
