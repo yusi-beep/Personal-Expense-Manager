@@ -2,192 +2,192 @@
 {% block content %}
 
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
- 	<h3 class="mb-2 mb-md-0">All Records</h3>
- 	<div class="d-flex gap-2">
- 		<a href="{{ url_for('records.add_record') }}" class="btn btn-success">Add Record</a>
-		<a href="{{ url_for('categories.add_category') }}" class="btn btn-warning">Add Category</a>
-	</div>
+    <h3 class="mb-2 mb-md-0">All Records</h3>
+    <div class="d-flex gap-2">
+            <a href="{{ url_for('records.add_record') }}" class="btn btn-success">Add Record</a>
+            <a href="{{ url_for('categories.add_category') }}" class="btn btn-warning">Add Category</a>
+    </div>
 </div>
 
 <!-- Export / Import -->
 <div class="card mb-3">
-	<div class="card-body d-flex flex-wrap align-items-center gap-2">
-		<a href="{{ url_for('records.export_csv') }}" class="btn btn-outline-primary btn-sm">Export CSV</a>
-		<a href="{{ url_for('records.export_pdf') }}" class="btn btn-outline-secondary btn-sm">Export PDF</a>
+    <div class="card-body d-flex flex-wrap align-items-center gap-2">
+            <a href="{{ url_for('records.export_csv') }}" class="btn btn-outline-primary btn-sm">Export CSV</a>
+            <a href="{{ url_for('records.export_pdf') }}" class="btn btn-outline-secondary btn-sm">Export PDF</a>
 
-		<form class="d-flex flex-wrap align-items-center gap-2 ms-auto"
-			action="{{ url_for('records.import_csv') }}"
-			method="POST" enctype="multipart/form-data">
-			<input type="file" name="file" accept=".csv"
-				class="form-control form-control-sm" required>
-			<div class="form-check">
-				<input class="form-check-input" type="checkbox" id="createCats" name="create_missing_categories" checked>
-				<label class="form-check-label" for="createCats">Create missing categories</label>
-			</div>
-			<button class="btn btn-success btn-sm" type="submit">Import CSV</button>
-		</form>
-		<form class="ms-auto d-flex align-items-center gap-2"
-			method="get" action="{{ url_for('records.list_records') }}">
-			<input type="hidden" name="sort" value="{{ sort }}">
-			<!-- Add: keep active filters -->
-			<input type="hidden" name="category"   value="{{ f_category }}">
-			<input type="hidden" name="entry_type" value="{{ f_type }}">
-			<input type="hidden" name="date_from"  value="{{ f_from }}">
-			<input type="hidden" name="date_to"    value="{{ f_to }}">
-			<input type="hidden" name="q"          value="{{ f_q }}">
-			<label class="text-muted small mb-0">Per page</label>
-			<select name="per" class="form-select form-select-sm" onchange="this.form.submit()">
-			{% for opt in [10,20,50,100] %}
-				<option value="{{ opt }}" {% if per|string == opt|string %}selected{% endif %}>{{ opt }}</option>
-			{% endfor %}
-			</select>
-		</form>
-	</div>
+            <form class="d-flex flex-wrap align-items-center gap-2 ms-auto"
+                    action="{{ url_for('records.import_csv') }}"
+                    method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".csv"
+                            class="form-control form-control-sm" required>
+                    <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="createCats" name="create_missing_categories" checked>
+                            <label class="form-check-label" for="createCats">Create missing categories</label>
+                    </div>
+                    <button class="btn btn-success btn-sm" type="submit">Import CSV</button>
+            </form>
+            <form class="ms-auto d-flex align-items-center gap-2"
+                    method="get" action="{{ url_for('records.list_records') }}">
+                    <input type="hidden" name="sort" value="{{ sort }}">
+                    <!-- Add: keep active filters -->
+                    <input type="hidden" name="category"   value="{{ f_category }}">
+                    <input type="hidden" name="entry_type" value="{{ f_type }}">
+                    <input type="hidden" name="date_from"  value="{{ f_from }}">
+                    <input type="hidden" name="date_to"    value="{{ f_to }}">
+                    <input type="hidden" name="q"          value="{{ f_q }}">
+                    <label class="text-muted small mb-0">Per page</label>
+                    <select name="per" class="form-select form-select-sm" onchange="this.form.submit()">
+                    {% for opt in [10,20,50,100] %}
+                            <option value="{{ opt }}" {% if per|string == opt|string %}selected{% endif %}>{{ opt }}</option>
+                    {% endfor %}
+                    </select>
+            </form>
+    </div>
 </div>
 
 <!-- FILTERS -->
-	<div class="card-body d-flex flex-wrap align-items-center gap-2">		
-		<div class="card mb-3">
-		  <div class="card-body">
-		    <form class="row g-2 align-items-end" method="get" action="{{ url_for('records.list_records') }}">
-		      <!-- скрити полета: да запазим пер и сортиране при филтър -->
-		      <input type="hidden" name="sort" value="{{ sort }}">
-		      <input type="hidden" name="per"  value="{{ per }}">
+    <div class="card-body d-flex flex-wrap align-items-center gap-2">               
+            <div class="card mb-3">
+              <div class="card-body">
+                <form class="row g-2 align-items-end" method="get" action="{{ url_for('records.list_records') }}">
+                  <!-- скрити полета: да запазим пер и сортиране при филтър -->
+                  <input type="hidden" name="sort" value="{{ sort }}">
+                  <input type="hidden" name="per"  value="{{ per }}">
 
-		      <div class="col-12 col-md-3">
-		        <label class="form-label">Category</label>
-		        <select name="category" class="form-select">
-		          <option value="">All</option>
-		          {% for c in categories %}
-		            <option value="{{ c.name }}" {% if f_category==c.name %}selected{% endif %}>{{ c.name }}</option>
-		          {% endfor %}
-		        </select>
-		      </div>
+                  <div class="col-12 col-md-3">
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-select">
+                      <option value="">All</option>
+                      {% for c in categories %}
+                        <option value="{{ c.name }}" {% if f_category==c.name %}selected{% endif %}>{{ c.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
 
-		      <div class="col-6 col-md-2">
-		        <label class="form-label">Type</label>
-		        <select name="entry_type" class="form-select">
-		          <option value="" {% if not f_type %}selected{% endif %}>All</option>
-		          <option value="income"  {% if f_type=='income' %}selected{% endif %}>Income</option>
-		          <option value="expense" {% if f_type=='expense' %}selected{% endif %}>Expense</option>
-		        </select>
-		      </div>
+                  <div class="col-6 col-md-2">
+                    <label class="form-label">Type</label>
+                    <select name="entry_type" class="form-select">
+                      <option value="" {% if not f_type %}selected{% endif %}>All</option>
+                      <option value="income"  {% if f_type=='income' %}selected{% endif %}>Income</option>
+                      <option value="expense" {% if f_type=='expense' %}selected{% endif %}>Expense</option>
+                    </select>
+                  </div>
 
-		      <div class="col-6 col-md-2">
-		        <label class="form-label">From</label>
-		        <input type="date" name="date_from" class="form-control" value="{{ f_from }}">
-		      </div>
+                  <div class="col-6 col-md-2">
+                    <label class="form-label">From</label>
+                    <input type="date" name="date_from" class="form-control" value="{{ f_from }}">
+                  </div>
 
-		      <div class="col-6 col-md-2">
-		        <label class="form-label">To</label>
-		        <input type="date" name="date_to" class="form-control" value="{{ f_to }}">
-		      </div>
+                  <div class="col-6 col-md-2">
+                    <label class="form-label">To</label>
+                    <input type="date" name="date_to" class="form-control" value="{{ f_to }}">
+                  </div>
 
-		      <div class="col-6 col-md-2">
-		        <label class="form-label">Search</label>
-		        <input type="text" name="q" class="form-control" placeholder="Description…" value="{{ f_q }}">
-		      </div>
+                  <div class="col-6 col-md-2">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="q" class="form-control" placeholder="Description…" value="{{ f_q }}">
+                  </div>
 
-		      <div class="col-12 col-md-1 d-grid">
-		        <button class="btn btn-primary">Filter</button>
-		      </div>
+                  <div class="col-12 col-md-1 d-grid">
+                    <button class="btn btn-primary">Filter</button>
+                  </div>
 
-		      <div class="col-12 col-md-1 d-grid">
-		        <a class="btn btn-outline-secondary"
-		           href="{{ url_for('records.list_records', sort=sort, per=per) }}">Reset</a>
-		      </div>
-		    </form>
-		  </div>
-		</div>
+                  <div class="col-12 col-md-1 d-grid">
+                    <a class="btn btn-outline-secondary"
+                       href="{{ url_for('records.list_records', sort=sort, per=per) }}">Reset</a>
+                  </div>
+                </form>
+              </div>
+            </div>
 
-	</div>
+    </div>
 
 
 {% if records|length == 0 %}
-	<div class="alert alert-info">No records yet. Use <b>Add Record</b> to create your first entry.</div>
+    <div class="alert alert-info">No records yet. Use <b>Add Record</b> to create your first entry.</div>
 {% else %}
-	<table class="table table-striped table-hover align-middle">
-		<thead>
-			<tr>
-				<th style="min-width:140px">
-					<a href="{{ url_for('records.list_records', sort='asc' if sort=='desc' else 'desc', page=1, per=per, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}" class="text-decoration-none">
-			            Date
-						{% if sort == 'asc' %}
-							▲
-						{% else %}
-							▼
-						{% endif %}
-					</a>
-				</th>
-				<th>Type</th>
-				<th>Category</th>
-				<th class="text-end">Amount</th>
-				<th>Description</th>
-				<th class="text-end" style="min-width:140px">Actions</th>
-			</tr>
-		</thead>
-	<tbody>
-		{% for r in records %}
-		<tr>
-			<td>{{ r.date }}</td>
-			<td>{{ r.type|title }}</td>
-			<td>{{ r.category }}</td>
-			<td class="text-end">{{ "%.2f"|format(r.amount) }}</td>
-			<td>{{ r.description }}</td>
-			<td class="text-end">
-			<a href="{{ url_for('records.edit_record', id=r.id) }}" class="btn btn-warning btn-sm">Edit</a>
+    <div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+            <thead>
+                    <tr>
+                            <th style="min-width:140px">
+                                    <a href="{{ url_for('records.list_records', sort='asc' if sort=='desc' else 'desc', page=1, per=per, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}" class="text-decoration-none">
+                                Date
+                                            {% if sort == 'asc' %}
+                                                    ▲
+                                            {% else %}
+                                                    ▼
+                                            {% endif %}
+                                    </a>
+                            </th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th class="text-end">Amount</th>
+                            <th>Description</th>
+                            <th class="text-end" style="min-width:140px">Actions</th>
+                    </tr>
+            </thead>
+    <tbody>
+            {% for r in records %}
+            <tr>
+                    <td>{{ r.date }}</td>
+                    <td>{{ r.type|title }}</td>
+                    <td>{{ r.category }}</td>
+                    <td class="text-end">{{ "%.2f"|format(r.amount) }}</td>
+                    <td>{{ r.description }}</td>
+                    <td class="text-end">
+                    <a href="{{ url_for('records.edit_record', id=r.id) }}" class="btn btn-warning btn-sm">Edit</a>
 
-			<form action="{{ url_for('records.delete_record', id=r.id) }}"
-				method="POST" style="display:inline;">
-				<button type="submit" class="btn btn-danger btn-sm"
-					onclick="return confirm('Delete this record?');">
-					Delete
-				</button>
-			</form>
-			</td>
-		</tr>
-		{% endfor %}
-	</tbody>
-	</table>
-	{% if pagination and total > 1 %}
-	<nav aria-label="Records pagination" class="mt-3">
-	  <ul class="pagination">
-	    <!-- First / Prev -->
-	    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-	      <a class="page-link" href="{{ url_for('records.list_records', page=1, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">&laquo;</a>
-	    </li>
-	    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-	      <a class="page-link" href="{{ url_for('records.list_records', page=pagination.prev_num, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">Prev</a>
-	    </li>
+                    <form action="{{ url_for('records.delete_record', id=r.id) }}"
+                            method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Delete this record?');">
+                                    Delete
+                            </button>
+                    </form>
+                    </td>
+            </tr>
+            {% endfor %}
+    </tbody>
+    </table>
+    </div> <!-- table-responsive -->
+    {% if pagination and total > 1 %}
+    <nav aria-label="Records pagination" class="mt-3">
+      <ul class="pagination">
+        <!-- First / Prev -->
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('records.list_records', page=1, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">&laquo;</a>
+        </li>
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('records.list_records', page=pagination.prev_num, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">Prev</a>
+        </li>
 
-	    <!-- Page numbers window -->
-	    {% if start > 1 %}
-	      <li class="page-item"><a class="page-link" href="{{ url_for('records.list_records', page=1, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">1</a></li>
-	      {% if start > 2 %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
-	    {% endif %}
+        <!-- Page numbers window -->
+        {% if start > 1 %}
+          <li class="page-item"><a class="page-link" href="{{ url_for('records.list_records', page=1, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">1</a></li>
+          {% if start > 2 %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+        {% endif %}
 
-	    {% for page_no in range(start, end + 1) %}
-	      <li class="page-item {% if page_no == p %}active{% endif %}">
-	        <a class="page-link" href="{{ url_for('records.list_records', page=page_no, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">{{ page_no }}</a>
-	      </li>
-	    {% endfor %}
+        {% for page_no in range(start, end + 1) %}
+          <li class="page-item {% if page_no == p %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('records.list_records', page=page_no, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">{{ page_no }}</a>
+          </li>
+        {% endfor %}
 
-	    {% if end < total %}
-	      {% if end < total - 1 %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
-	      <li class="page-item"><a class="page-link" href="{{ url_for('records.list_records', page=total, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">{{ total }}</a></li>
-	    {% endif %}
+        {% if end < total %}
+          {% if end < total - 1 %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+          <li class="page-item"><a class="page-link" href="{{ url_for('records.list_records', page=total, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">{{ total }}</a></li>
+        {% endif %}
 
-	    <!-- Next / Last -->
-	    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-	      <a class="page-link" href="{{ url_for('records.list_records', page=pagination.next_num, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">Next</a>
-	    </li>
-	    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-	      <a class="page-link" href="{{ url_for('records.list_records', page=total, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">&raquo;</a>
-	    </li>
-	  </ul>
-	</nav>
-	{% endif %}
-
-{% endif %}
+        <!-- Next / Last -->
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('records.list_records', page=pagination.next_num, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">Next</a>
+        </li>
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('records.list_records', page=total, per=per, sort=sort, category=f_category, entry_type=f_type, date_from=f_from, date_to=f_to, q=f_q) }}">&raquo;</a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %}
 
 {% endblock %}

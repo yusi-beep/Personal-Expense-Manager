@@ -199,6 +199,12 @@ body.theme-dark .table-striped > tbody > tr:nth-of-type(odd) > *{ background:#11
 body.theme-dark .table-striped > tbody > tr:nth-of-type(even) > *{ background:#1f2937; }
 body.theme-dark .table-hover tbody tr:hover > *{ background:#374151; }
 
+/* Footer text in dark mode */
+body.theme-dark footer.text-muted,
+body.theme-dark footer .text-muted {
+  color:#9ca3af !important;
+}
+
 /* Forms */
 body.theme-dark .form-control,
 body.theme-dark .form-select{
