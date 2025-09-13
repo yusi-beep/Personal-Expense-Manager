@@ -158,9 +158,17 @@ body.theme-dark .navbar .nav-link.active{
   font-weight:600;
 }
 
+/* Mobile navbar toggler in dark mode */
+body.theme-dark .navbar-toggler{
+  border-color:#475569;
+}
+body.theme-dark .navbar-toggler-icon{
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
 /* Cards / panels / sections */
 body.theme-dark .card{
-  background:#e5e7eb;
+  background:#0f172a;
   border:1px solid #1f2937;
   color:#e5e7eb;
   box-shadow:none;
@@ -206,7 +214,16 @@ body.theme-dark .form-select:focus{
 }
 
 /* Buttons */
-body.theme-dark .btn-outline-secondary{ color:#e5e7eb; border-color:#475569; }
+body.theme-dark .btn-outline-secondary{ 
+  color:#f3f4f6; 
+  border-color:#6b7280; 
+  background: rgba(55, 65, 81, 0.3);
+}
+body.theme-dark .btn-outline-secondary:hover{ 
+  color:#ffffff; 
+  border-color:#9ca3af; 
+  background: rgba(75, 85, 99, 0.5);
+}
 body.theme-dark .btn:hover{ filter:brightness(1.08); }
 body.theme-dark .btn-warning{ color:#111827; }   /* по-четим текст върху жълто */
 
@@ -222,8 +239,8 @@ body.theme-dark hr{ border-color:#1f2937; }
 
 /* Chart containers */
 body.theme-dark .chart-box{
-  background:#e5e7eb;
-  border:1px solid #e5e7eb;
+  background:#0f172a;
+  border:1px solid #1f2937;
   border-radius:12px;
 }
 
